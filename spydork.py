@@ -106,7 +106,7 @@ def cek():
 	print (W+43*"-")
 	hasil = []
 	for url in finallist:
-		print (R+"[!] "+W+"Scanning Web Vuln..\r"),;sys.stdout.flush()
+		print (R+"[!] "+W+"Web Vuln Taraniyor..\r"),;sys.stdout.flush()
 		EXT = "'"
 		host = url+EXT
 		try:
@@ -126,21 +126,21 @@ def cek():
 		pass
 	else:
 		print (W+43*"-")
-		print (R+"[!] "+W+"Saving vuln web.."),;sys.stdout.flush()
+		print (R+"[!] "+W+"Vuln web kaydediliyor.."),;sys.stdout.flush()
 		for x in hasil:
 			vuln.write(x+"\n")
 		vuln.close()
 
-		print (B+"\r[+] "+G+"successfully saved in "+W+filename)
+		print (B+"\r[+] "+G+"basariyla kaydedildi"+W+filename)
 
-        print (B+"\r[*] "+G+"Total web vuln "+W+": %s "%(len(hasil)))
+        print (B+"\r[*] "+G+"Toplam web vuln "+W+": %s "%(len(hasil)))
 	print (W+43*'-'+'\n')
 
 
 # Searching web --
 def cari(inurl , site , maxc):
 
-    print (R+"[!] "+W+"Please Wait.."+glp),;sys.stdout.flush()
+    print (R+"[!] "+W+"Lutfen Bekleyin..  spyhackerz.org"+glp),;sys.stdout.flush()
 
     urls = []
     page = 0
@@ -170,25 +170,25 @@ def cari(inurl , site , maxc):
 
 	percent = int((1.0*page/int(maxc))*100)
 	urls_len = len(urls)
-	sys.stdout.write("\r[*] Urls: %s | Percent: %s | Page: %s [*]" % (repr(urls_len),repr(percent)+"%",repr(page))),
+	sys.stdout.write("\r[*] Urls: %s | Yuzde: %s | Sayfa: %s [*]" % (repr(urls_len),repr(percent)+"%",repr(page))),
 	sys.stdout.flush()
 
     except KeyboardInterrupt:
       pass
     except urllib2.URLError as e:
-	print (R+"\r-- "+W+"Error "+R+"-- "+W+": %s"%e)
+	print (R+"\r-- "+W+"Hata "+R+"-- "+W+": %s"%e)
 	print (W+43*"-")
 	sys.exit()
     except socket.error as s:
-	print (R+"\r-- "+W+"Error "+R+"-- "+W+": %s"%s)
+	print (R+"\r-- "+W+"Hata "+R+"-- "+W+": %s"%s)
 	print (W+43*"-")
 	sys.exit()
     except httplib.IncompleteRead as h:
-	print (R+"\r-- "+W+"Error "+R+"-- "+W+": %s"%h)
+	print (R+"\r-- "+W+"Hata "+R+"-- "+W+": %s"%h)
 	print (W+43*"-")
         sys.exit()
     except ValueError as V:
-	print (R+"\r-- "+W+"Error "+R+"-- "+W+": %s"%V)
+	print (R+"\r-- "+W+"Hata "+R+"-- "+W+": %s"%V)
 	print (W+43*"-")
         sys.exit()
 
@@ -216,9 +216,9 @@ if __name__ == "__main__":
 	
 	print (W+43*"-")
 
-	inurl = raw_input(B+"[?]"+G+" Inurl    "+W+": ")
-	site  = raw_input(B+"[?]"+G+" Site     "+W+": ")
-	maxc  = raw_input(B+"[?]"+G+" Max Page "+W+": ")
+	inurl = raw_input(B+"[?]"+G+" Dork girin    "+W+": ")
+	site  = raw_input(B+"[?]"+G+" Site kodu girin     "+W+": ")
+	maxc  = raw_input(B+"[?]"+G+" Kac Sayfa aratilacak "+W+": ")
 
 	print (43*"-")
 	cari(inurl , site , maxc)
