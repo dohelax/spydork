@@ -1,6 +1,6 @@
 import argparse
+import urllib.parse as urlparse
 import urllib.request as urllib2
-import http.cookiejar as cookielib
 import random
 import re
 import sys
@@ -86,6 +86,7 @@ def cari(inurl, site, maxc, api_key):
     try:
         while page <= int(maxc):
             query = f'{inurl} site:{site}'
+            query = urlparse.quote(query)  # Özel karakterleri URL güvenli biçime dönüştür
             results_web = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={cx}&start={page * 10 - 9}'
             request_web = urllib2.Request(results_web)
             request_web.add_header('User-Agent', random.choice(header))
