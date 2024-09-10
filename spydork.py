@@ -1,30 +1,21 @@
-
-
-       #########################################
-       # Author : Dohela                       #
-       # Team   : Spyhackerz.org               #
-       # Date   : 5 - 3 - 2020                 #
-       # Github : https://github.com/dohelax #
-       #########################################
-
+import argparse
 import urllib.request as urllib2
 import http.cookiejar as cookielib
 import random
 import re
 import sys
 import socket
-import time
-import ssl
+import json
 import http.client as httplib
 
 # Renkli konsol çıktıları (Linux/Windows platformlarına göre)
 if sys.platform in ["linux", "linux2"]:
-    R = ("\033[31m")
-    W = ("\033[0;1m")
-    B = ("\033[35m")
-    G = ("\033[32m")
-    glp = ("\033[2m")
-    Y = ("\033[33;1m")
+    R = "\033[31m"
+    W = "\033[0;1m"
+    B = "\033[35m"
+    G = "\033[32m"
+    glp = "\033[2m"
+    Y = "\033[33;1m"
 else:
     R = ""
     W = ""
@@ -34,7 +25,6 @@ else:
     glp = ""
 
 filename = "vuln.txt"
-vuln = open(filename, "a")
 finallist = []
 
 # User-Agent listesi
@@ -55,9 +45,6 @@ errors = {
     'Syntax error': 'Syntax error'
 }
 
-# Ülke kodları
-sites = ['com', 'net', 'org', 'gov', 'edu', 'us', 'uk', 'de', 'fr', 'ru', 'cn']
-
 # Web tarama işlemi
 def cek():
     print(W + "-" * 43)
@@ -68,62 +55,62 @@ def cek():
         EXT = "'"
         host = url + EXT
         try:
-            source = urllib2.urlopen(host).read().decode('utf-8', 'ignore')
+            req = urllib2.Request(host)
+            req.add_header('User-Agent', random.choice(header))
+            response = urllib2.urlopen(req)
+            source = response.read().decode('utf-8', 'ignore')
             for type, eMSG in errors.items():
                 if re.search(eMSG, source):
                     print(B + "[+]" + G + " Vuln  " + W + ": " + host.replace("'", ""))
                     print(B + "[*]" + R + " Error " + W + ": " + glp + type + W)
                     hasil.append(host.replace("'", ""))
-                else:
-                    pass
-        except:
-            pass
+        except Exception as e:
+            print(R + "[!] " + W + f"Error: {e}")
 
     if len(hasil) > 0:
         print(W + "-" * 43)
         print(R + "[!] " + W + "Vuln web kaydediliyor..")
-        for x in hasil:
-            vuln.write(x + "\n")
-        vuln.close()
+        with open(filename, "a") as vuln:
+            for x in hasil:
+                vuln.write(x + "\n")
         print(B + "[+] " + G + "Başarıyla kaydedildi: " + W + filename)
         print(B + "[*] " + G + "Toplam web vuln: " + W + str(len(hasil)))
     print(W + "-" * 43 + '\n')
 
 # Web arama işlemi
-def cari(inurl, site, maxc):
+def cari(inurl, site, maxc, api_key):
     print(R + "[!] " + W + "Lütfen Bekleyin..")
     urls = []
-    page = 0
-    try:
-        while page < int(maxc):
-            jar = cookielib.CookieJar()
-            query = inurl + "+site:" + site
-            results_web = f'http://www.search-results.com/web?q={query}&hl=en&page={page}&src=hmp'
-            request_web = urllib2.Request(results_web)
-            agent = random.choice(header)
-            request_web.add_header('User-Agent', agent)
-            opener_web = urllib2.build_opener(urllib2.HTTPCookieProcessor(jar))
-            text = opener_web.open(request_web).read().decode('utf-8', 'ignore')
-            stringreg = re.compile(r'(?<=href=")(.*?)(?=")')
-            names = stringreg.findall(text)
-            page += 1
+    page = 1
 
-            for name in names:
-                if name not in urls:
-                    if re.search(r'\(', name) or re.search("<", name) or re.search("\A/", name) or re.search("\A(http://)\d", name):
+    try:
+        while page <= int(maxc):
+            query = f'{inurl} site:{site}'
+            results_web = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={cx}&start={page * 10 - 9}'
+            request_web = urllib2.Request(results_web)
+            request_web.add_header('User-Agent', random.choice(header))
+            response = urllib2.urlopen(request_web)
+            result = json.load(response)
+
+            for item in result.get('items', []):
+                link = item.get('link')
+                if link and link not in urls:
+                    if re.search(r'\(', link) or re.search("<", link) or re.search("\A/", link) or re.search("\A(http://)\d", link):
                         pass
-                    elif re.search("google", name) or re.search("youtube", name):
+                    elif re.search("google", link) or re.search("youtube", link):
                         pass
                     else:
-                        urls.append(name)
+                        urls.append(link)
 
             percent = int((1.0 * page / int(maxc)) * 100)
             urls_len = len(urls)
             sys.stdout.write(f"\r[*] Urls: {urls_len} | Yüzde: {percent}% | Sayfa: {page} [*]")
             sys.stdout.flush()
+            page += 1
 
     except KeyboardInterrupt:
-        pass
+        print(R + "\r-- " + W + "Kullanıcı tarafından kesildi.")
+        sys.exit()
     except urllib2.URLError as e:
         print(R + "\r-- " + W + "Hata " + R + "-- " + W + f": {e}")
         sys.exit()
@@ -142,19 +129,26 @@ def cari(inurl, site, maxc):
             if domain not in tmplist and "=" in url:
                 finallist.append(url)
                 tmplist.append(domain)
-        except:
-            pass
+        except Exception as e:
+            print(R + "[!] " + W + f"Error processing URL: {e}")
 
     print("\n" + W + "-" * 43)
     print(B + "[+] " + G + f"Urls (sorted): {len(finallist)} Url")
     return finallist
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='SPYSQLi DorkScanner - Spyhackerz.org')
+    parser.add_argument('--token', required=True, help='Google API key')
+    args = parser.parse_args()
+
+    api_key = args.token
+    cx = 'YOUR_SEARCH_ENGINE_ID'  # Özelleştirilmiş arama motoru ID'nizi buraya ekleyin
+
     print("SPYSQLi DorkScanner - Spyhackerz.org")
     print(W + "-" * 43)
     inurl = input(B + "[?]" + G + " Dork girin: " + W)
     site = input(B + "[?]" + G + " Site kodu girin: " + W)
     maxc = input(B + "[?]" + G + " Kaç Sayfa aratilacak: " + W)
     print(W + "-" * 43)
-    cari(inurl, site, maxc)
+    cari(inurl, site, maxc, api_key)
     cek()
